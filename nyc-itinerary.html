@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<title>NYC Trip · June 20–26, 2026</title>
+<style>
+  :root{
+    --bg:#0f1020; --card:#1a1b2e; --card2:#202243; --ink:#f3f4f8; --muted:#a8acc4;
+    --line:#2c2e52; --ok:#27c08a; --warn:#ffb13b; --book:#ff5d6c; --accent:#7aa2ff;
+    --chelsea:#ff8a5b; --wburg:#27c2b5; --dumbo:#a78bfa; --village:#5fd06a;
+    --park:#ff6fae; --fidi:#5b8dff; --depart:#9aa0b8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; -webkit-text-size-adjust:100%; padding-bottom:48px;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:16px}
+  header.hero{
+    text-align:center;padding:26px 16px 18px;
+    background:linear-gradient(135deg,#16182e,#221b3a 60%,#2a1830);
+    border-bottom:1px solid var(--line);
+  }
+  header.hero h1{margin:0;font-size:1.6rem;letter-spacing:.3px}
+  header.hero .sub{color:var(--muted);font-size:.92rem;margin-top:6px}
+  header.hero .hotel{margin-top:8px;font-size:.82rem;color:var(--accent)}
+
+  h2.section{font-size:1.05rem;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 6px;margin-bottom:18px}
+  .panel .phint{color:var(--muted);font-size:.8rem;margin:0 0 8px}
+  .book-item{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-top:1px solid var(--line)}
+  .book-item:first-of-type{border-top:none}
+  .book-item input[type=checkbox]{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--ok)}
+  .book-item .bt{font-weight:600}
+  .book-item .bw{display:inline-block;font-size:.74rem;color:#1c1326;background:var(--warn);
+    padding:1px 7px;border-radius:20px;margin-left:6px;font-weight:700;white-space:nowrap}
+  .book-item .bw.now{background:var(--book);color:#fff}
+  .book-item .bw.done{background:var(--ok);color:#06231a}
+  .book-item .bd{color:var(--muted);font-size:.83rem;display:block;margin-top:2px}
+  .book-item.checked .bt{text-decoration:line-through;color:var(--muted)}
+  .book-item a{color:var(--accent)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 18px}
+  .legend span{font-size:.74rem;color:var(--muted);background:var(--card2);border:1px solid var(--line);
+    padding:3px 9px;border-radius:20px}
+
+  .day{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:16px;overflow:hidden}
+  .day .dhead{padding:14px 16px;border-left:7px solid var(--nh,#888);cursor:pointer;user-select:none;
+    display:flex;align-items:flex-start;gap:10px}
+  .day .dhead .chev{flex:0 0 auto;font-size:1rem;color:var(--muted);transition:transform .2s;margin-top:3px}
+  .day.collapsed .dhead .chev{transform:rotate(-90deg)}
+  .day .dhmain{flex:1 1 auto;min-width:0}
+  .day .dtop{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+  .day .ddate{font-weight:700;font-size:1.06rem}
+  .day .dhood{font-size:.78rem;font-weight:700;color:#13111f;background:var(--nh,#888);
+    padding:2px 10px;border-radius:20px}
+  .day .dnote{color:var(--muted);font-size:.84rem;margin-top:5px}
+  .day .dcount{font-size:.72rem;color:var(--muted);margin-top:4px}
+  .day.collapsed .dnote{display:none}
+  .day .dbody{max-height:6000px;overflow:hidden;transition:max-height .28s ease}
+  .day.collapsed .dbody{max-height:0}
+
+  .mapwrap{padding:10px 14px 2px}
+  .mapwrap iframe.gmap{width:100%;height:230px;border:0;border-radius:12px;background:var(--card2);display:block}
+  .maplinks{display:flex;flex-wrap:wrap;gap:8px;margin:8px 2px 2px}
+  .mlink{font-size:.8rem;color:var(--accent);text-decoration:none;background:var(--card2);
+    border:1px solid var(--line);border-radius:20px;padding:6px 12px;display:inline-block}
+  .mapcap{font-size:.7rem;color:var(--muted);margin:6px 2px 0;text-align:center}
+  .pinlink{margin-left:6px;text-decoration:none;font-size:.85rem;opacity:.85;vertical-align:middle}
+
+  .items{padding:4px 10px 6px}
+  .item{display:flex;gap:9px;align-items:flex-start;padding:11px 6px;border-top:1px solid var(--line)}
+  .item:first-child{border-top:none}
+  .item input[type=checkbox]{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--accent)}
+  .item .num{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--nh,#888);color:#13111f;
+    font-weight:800;font-size:.78rem;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .item .ic{flex:0 0 auto;font-size:1.1rem;width:22px;text-align:center;line-height:1.5}
+  .item .body{flex:1 1 auto;min-width:0}
+  .item .when{font-size:.74rem;color:var(--accent);font-weight:700;letter-spacing:.2px}
+  .item .name{font-weight:600}
+  .item .tag{font-size:.66rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
+    border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-left:6px}
+  .item .desc{color:var(--muted);font-size:.85rem;margin-top:2px}
+  .item .badge{display:inline-block;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:20px;margin-left:6px;white-space:nowrap;vertical-align:middle}
+  .badge.book{background:var(--book);color:#fff}
+  .badge.soft{background:var(--warn);color:#241600}
+  .badge.booked{background:var(--ok);color:#06231a}
+  .badge.free{background:#3a3d6e;color:#cdd2ff}
+  .item.checked .name{text-decoration:line-through;color:var(--muted)}
+  .item .must{color:#ffd24a;font-weight:800;font-size:.7rem;margin-left:6px}
+
+  .notes{padding:0 16px 16px}
+  .notes label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:5px}
+  .notes textarea{width:100%;min-height:60px;background:var(--card2);color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:9px;font-family:inherit;font-size:.9rem;resize:vertical}
+
+  .tools{display:flex;gap:8px;justify-content:center;margin:6px 0 24px;flex-wrap:wrap}
+  .tools button{background:var(--card2);color:var(--muted);border:1px solid var(--line);
+    border-radius:20px;padding:7px 14px;font-size:.8rem;cursor:pointer}
+  .tools button:active{transform:scale(.97)}
+  footer{text-align:center;color:var(--muted);font-size:.76rem;padding:10px 16px 0}
+  a{color:var(--accent)}
+  .saved{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ok);
+    color:#06231a;padding:7px 16px;border-radius:20px;font-size:.82rem;font-weight:700;
+    opacity:0;transition:opacity .25s;pointer-events:none;z-index:50}
+  .saved.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>🗽 New York City</h1>
+  <div class="sub">Sat June 20 – Fri June 26, 2026 · moderate pace · walk + subway</div>
+  <div class="hotel">🏨 Base: Hyatt Place New York / Chelsea · 144 W 28th St</div>
+</header>
+
+<div class="wrap">
+
+  <h2 class="section">✅ To-Book Checklist <span style="font-size:.72rem;color:var(--muted);font-weight:400">— reserve in priority order</span></h2>
+  <div class="panel" id="bookPanel">
+    <p class="phint">Ticks save automatically on this device. Badges: <b style="color:var(--book)">NOW</b> = book ASAP · <b style="color:var(--warn)">SOON</b> = a few weeks out · <b style="color:var(--ok)">DONE</b> = handled.</p>
+  </div>
+
+  <h2 class="section">🎨 Legend</h2>
+  <div class="legend">
+    <span>☕ Coffee</span><span>🏛️ Sight / Museum</span><span>🌆 View</span>
+    <span>🍽️ Food</span><span>🍸 Bar</span><span>🎟️ Activity</span><span>🛍️ Market</span>
+    <span>⭐ = your "must"</span><span>① numbers = map pins</span>
+  </div>
+
+  <div class="tools" style="margin:0 0 8px">
+    <button id="expandAll">Expand all days</button>
+    <button id="collapseAll">Collapse all days</button>
+  </div>
+
+  <div id="days"></div>
+
+  <div class="tools">
+    <button id="resetChk">Reset all check-offs</button>
+    <button id="clearNotes">Clear all notes</button>
+  </div>
+
+  <footer>
+    Times are approximate — shift freely. SummerStage show is <b>5:00 PM, free</b>.
+    Late-June sunset ≈ 8:30 PM. The embedded Google maps need an internet connection;
+    your checkmarks, notes and the rest work offline. Tap 📍 on any stop to open it in Google Maps.
+  </footer>
+</div>
+
+<div class="saved" id="toast">Saved ✓</div>
+
+<script>
+/* ---------- TO-BOOK CHECKLIST ---------- */
+const BOOK = [
+  {id:'b_totr', t:'Top of the Rock — SUNSET slot', w:'NOW', cls:'now',
+   d:'Your must. Sunset timeslots sell out first. Book the ~8:00–8:30 PM entry for Sat Jun 20 (or move to Thu Jun 25 evening if you land late Sat).'},
+  {id:'b_lib', t:'Statue of Liberty / Ellis Island ferry', w:'NOW', cls:'now',
+   d:'For the Thu Jun 25 harbor day. Reserve via Statue City Cruises 3–4 weeks out; pedestal/crown access sells out months ahead. (Staten Island Ferry is free, no booking.)'},
+  {id:'b_gov', t:'Governors Island ferry', w:'SOON', cls:'',
+   d:'Alternative to Statue of Liberty on the Jun 25 harbor day. Summer weekend slots sell out — book ahead.'},
+  {id:'b_bike', t:'Central Park bike rental', w:'SOON', cls:'',
+   d:'For Wed Jun 24 morning, before the 5 PM show. Reserve online to skip lines; walk-up also possible.'},
+  {id:'b_cellar', t:'Comedy Cellar', w:'NOW', cls:'now',
+   d:'Tiny room, sells out. Tickets release ~10–14 days ahead and go fast — book the moment your Tue Jun 23 slot opens.'},
+  {id:'b_bway', t:'Broadway show (optional)', w:'SOON', cls:'',
+   d:'If you want one: book now for good seats, or grab same-day TKTS discounts. Suggested free evening: Mon Jun 22 after the bridge walk.'},
+  {id:'b_heli', t:'Helicopter ride — FlyNYON (optional)', w:'SOON', cls:'',
+   d:'Doors-off flights from Downtown/Kearny. Book 2–3 weeks out. Pairs with the Jun 25 Lower Manhattan day.'},
+  {id:'b_owo', t:'One World Observatory (optional)', w:'SOON', cls:'',
+   d:'Optional second observatory on the Jun 25 FiDi day. Buy timed entry ahead to skip the line.'},
+  {id:'b_obs2', t:'Summit One Vanderbilt / The Edge / Empire State (optional alternates)', w:'SOON', cls:'',
+   d:'Pick at most one as an alternate to Top of the Rock. All require timed tickets — book ahead.'},
+  {id:'b_luger', t:'Peter Luger Steak House (optional dinner)', w:'NOW', cls:'now',
+   d:'Williamsburg icon for the Jun 21 Brooklyn day. Books up weeks ahead — reserve early or pick the casual alt.'},
+  {id:'b_resto', t:'High-demand dinners: Rezdôra / Carbone / Lilia', w:'NOW', cls:'now',
+   d:'If you want any of these, reserve the instant the booking window opens (Resy, ~14–30 days out). Casual alternates listed each day.'},
+  {id:'b_azure', t:'Azure Rooftop Party @ Arlo Williamsburg', w:'DONE', cls:'done',
+   d:'Tickets already purchased — Sun Jun 21, from ~3 PM. ✓'},
+  {id:'b_summer', t:'Black Country, New Road @ SummerStage', w:'DONE', cls:'done',
+   d:'Wed Jun 24, 5:00 PM, Rumsey Playfield. FREE & first-come — no ticket needed, but arrive ~4 PM for the line.'},
+];
+
+/* ---------- ITINERARY (c = [lat,lng] for map pin) ---------- */
+const NH = {chelsea:'#ff8a5b',wburg:'#27c2b5',dumbo:'#a78bfa',village:'#5fd06a',park:'#ff6fae',fidi:'#5b8dff',depart:'#9aa0b8'};
+const IC = {coffee:'☕',sight:'🏛️',view:'🌆',food:'🍽️',bar:'🍸',activity:'🎟️',market:'🛍️',walk:'🚶',park:'🌳'};
+
+function badge(b){
+  if(!b) return '';
+  const m={book:['book','TO BOOK'],soft:['soft','RESERVE'],booked:['booked','BOOKED'],free:['free','FREE']};
+  const x=m[b]; return x?`<span class="badge ${x[0]}">${x[1]}</span>`:'';
+}
+
+const DAYS = [
+  {
+    id:'d1', date:'Sat · June 20', hood:'Chelsea · Flatiron · NoMad (+ Midtown sunset)', nh:'chelsea',
+    note:'Arrival & home-base day. Everything is a short walk from the hotel; cap it with Top of the Rock at sunset (straight up 6th Ave). If you land late, move Top of the Rock to Thu Jun 25.',
+    items:[
+      {w:'on arrival', t:'coffee', n:'Birch Coffee', must:1, c:[40.7441,-73.9876], d:'Your must coffee — NoMad branch on E 27th St, a 3-min walk from the hotel.'},
+      {w:'afternoon', t:'walk', n:'The High Line', c:[40.7479,-74.0048], d:'Enter at W 30th/10th Ave and stroll the elevated rail garden south into the Meatpacking District.'},
+      {w:'~1:00 PM', t:'market', n:'Chelsea Market', c:[40.7424,-74.0061], d:'Your favorite — graze the food hall for lunch (Los Tacos No.1, lobster, bakeries).'},
+      {w:'late aft.', t:'park', n:'Madison Square Park', c:[40.7424,-73.9880], d:'Green breather by the Flatiron Building; original Shake Shack here if you want a snack.'},
+      {w:'~7:45 PM', t:'view', n:'Top of the Rock — SUNSET', must:1, b:'book', c:[40.7593,-73.9794], d:'THE must. Rockefeller Center decks; book the ~8:00–8:30 PM slot ASAP. ~12-min up 6th Ave.'},
+      {w:'~9:30 PM', t:'food', n:'Italian: Rezdôra (Flatiron)', b:'soft', c:[40.7389,-73.9885], d:'Blank Italian slot — acclaimed Emilia-Romagna pasta; reserve on Resy. Casual alt: Eataly Flatiron.'},
+      {w:'nightcap', t:'bar', n:'230 Fifth Rooftop Bar', c:[40.7448,-73.9882], d:'Your pick — open-air rooftop with a direct Empire State Building view, 2 blocks from the hotel.'},
+    ]
+  },
+  {
+    id:'d2', date:'Sun · June 21', hood:'Williamsburg · North Brooklyn', nh:'wburg',
+    note:'Brooklyn day built around the Azure rooftop party at 3 PM. Take the L from 14th St to Bedford Ave. Note: Smorgasburg is in Williamsburg on Saturdays only — Sundays it’s at Prospect Park, so we graze Williamsburg instead.',
+    items:[
+      {w:'~10:00 AM', t:'coffee', n:'Blank Street Coffee (Bedford Ave)', c:[40.7170,-73.9565], d:'Your list — quick & reliable. Upgrade: Devoción, a jungle-lit Colombian roaster nearby.'},
+      {w:'late morn', t:'walk', n:'Domino Park & waterfront', c:[40.7144,-73.9678], d:'Riverside park with the best Manhattan-skyline view in Brooklyn; pre-party stroll.'},
+      {w:'~12:30 PM', t:'food', n:'Lunch in Williamsburg', c:[40.7155,-73.9555], d:'Light bite — tacos at Chela & Garnacha, or a slice at Best Pizza on Havemeyer.'},
+      {w:'~3:00 PM', t:'activity', n:'Azure Rooftop Party @ Arlo Williamsburg', b:'booked', c:[40.7218,-73.9585], d:'Your anchor — tickets purchased. Rooftop afternoon with skyline views.'},
+      {w:'~8:00 PM', t:'food', n:'American: Peter Luger Steak House', b:'soft', c:[40.7099,-73.9626], d:'Blank American slot — legendary Williamsburg steakhouse; book weeks ahead (cash/debit). Casual alt: Marlow & Sons.'},
+      {w:'nightcap', t:'bar', n:'The Ides at Wythe Hotel', c:[40.7218,-73.9581], d:'Rooftop cocktails over the skyline; or Westlight at The William Vale for a higher vantage.'},
+    ]
+  },
+  {
+    id:'d3', date:'Mon · June 22', hood:'DUMBO · Brooklyn Heights · Brooklyn Bridge Park', nh:'dumbo',
+    note:'The prettiest stretch of waterfront in NYC. Subway to Clark St or Borough Hall, walk down to the water, and finish by crossing the Brooklyn Bridge back into Manhattan.',
+    items:[
+      {w:'~9:30 AM', t:'coffee', n:'Brooklyn Roasting Company', c:[40.7035,-73.9869], d:'Warehouse-y café near the water to fuel up. (Or Devoción’s DUMBO outpost.)'},
+      {w:'morning', t:'sight', n:'Brooklyn Bridge Park — Pier 5', must:1, c:[40.6968,-73.9994], d:'Your must. Walk the piers north; lawns, Jane’s Carousel, head-on Manhattan views.'},
+      {w:'late morn', t:'walk', n:'Brooklyn Heights Promenade + Squibb Bridge', c:[40.6968,-73.9966], d:'Bouncy footbridge up to the cliff-top promenade for the classic skyline panorama.'},
+      {w:'~1:00 PM', t:'market', n:'Time Out Market (DUMBO)', c:[40.7027,-73.9908], d:'Your favorite — two dozen stalls + rooftop with bridge views. Lunch here.'},
+      {w:'afternoon', t:'view', n:'DUMBO — Washington & Water St', c:[40.7036,-73.9905], d:'The iconic shot: Manhattan Bridge framed between brick buildings. Pebble Beach just below.'},
+      {w:'~5:00 PM', t:'food', n:'Italian: Cecconi’s DUMBO', b:'soft', c:[40.7026,-73.9912], d:'Blank Italian slot — waterfront Italian under the bridge; reserve. Casual alt: Juliana’s pizza.'},
+      {w:'~7:00 PM', t:'bar', n:'Harriet’s Rooftop (1 Hotel)', c:[40.7008,-73.9956], d:'Sunset cocktails over the harbor.'},
+      {w:'dusk', t:'walk', n:'Walk the Brooklyn Bridge → Manhattan', c:[40.7061,-73.9969], d:'End the day on foot across the bridge. (Optional: a Broadway show tonight — see To-Book.)'},
+    ]
+  },
+  {
+    id:'d4', date:'Tue · June 23', hood:'Greenwich Village · East Village · Lower East Side', nh:'village',
+    note:'Downtown wandering day — bagels, ball courts, parks, pizza, and a late comedy show. Very walkable; the subway only to start and end.',
+    items:[
+      {w:'~9:30 AM', t:'coffee', n:'La Cabra (East Village)', must:1, c:[40.7290,-73.9869], d:'Your must coffee — Danish minimalist roaster on 2nd Ave with great cardamom buns.'},
+      {w:'~10:30 AM', t:'food', n:'Russ & Daughters Cafe', c:[40.7215,-73.9882], d:'Your pick — sit-down appetizing classic: bagels, lox, whitefish on the LES.'},
+      {w:'midday', t:'activity', n:'The Cage — West 4th St Courts', c:[40.7314,-74.0007], d:'Your pick — legendary streetball court; catch a pickup game through the fence.'},
+      {w:'afternoon', t:'park', n:'Washington Square Park + SoHo', c:[40.7308,-73.9973], d:'Arch, fountain, buskers — then drift into SoHo’s cast-iron shopping blocks.'},
+      {w:'~3:00 PM', t:'food', n:'Joe’s Pizza (Carmine St)', c:[40.7305,-74.0030], d:'Your pick — NYC’s most famous slice. Eat it on the sidewalk.'},
+      {w:'~7:00 PM', t:'food', n:'Mexican: Tacombi / Jajaja', b:'soft', c:[40.7223,-73.9948], d:'Blank Mexican slot — Tacombi’s casual tacos (NoLita) or plant-based Jajaja on the LES. No res.'},
+      {w:'~9:30 PM', t:'activity', n:'Comedy Cellar (MacDougal St)', b:'book', c:[40.7301,-74.0003], d:'Book ASAP — tiny room, sells out. Late show fits dinner timing.'},
+      {w:'after', t:'bar', n:'PDT speakeasy', c:[40.7273,-73.9844], d:'Your "NYC speakeasy" — enter through the phone booth inside Crif Dogs, East Village.'},
+    ]
+  },
+  {
+    id:'d5', date:'Wed · June 24', hood:'Central Park · Upper East Side · The Met', nh:'park',
+    note:'Central Park day around the 5 PM SummerStage show. Bike the park in the morning while it’s cool, hit the Met, then walk to Rumsey Playfield. Arrive ~4 PM for the free-show line.',
+    items:[
+      {w:'~9:00 AM', t:'coffee', n:'Joe Coffee / Blank Street (UES)', c:[40.7730,-73.9618], d:'Grab coffee on the way to the bike kiosk.'},
+      {w:'~9:30 AM', t:'activity', n:'Central Park bike ride — S→N', must:1, b:'book', c:[40.7679,-73.9819], d:'Your must route. Rent near Columbus Circle, loop up past Bethesda, the Reservoir, toward Harlem. Reserve ahead.'},
+      {w:'~12:30 PM', t:'food', n:'Lunch on the Upper East Side', c:[40.7782,-73.9601], d:'Casual near the Met — a café on Madison, or the Met rooftop bar in summer.'},
+      {w:'~1:30 PM', t:'sight', n:'The Metropolitan Museum of Art', must:1, c:[40.7794,-73.9632], d:'Your must museum — 2–3 focused hours. Pay-what-you-wish for NY State residents; others timed tickets.'},
+      {w:'~4:00 PM', t:'food', n:'American: The Penrose / pre-show snack', c:[40.7762,-73.9530], d:'Blank American slot — UES gastropub, or grab food carts by the park before lining up.'},
+      {w:'5:00 PM', t:'activity', n:'Black Country, New Road @ SummerStage', b:'free', c:[40.7712,-73.9710], d:'Your anchor — Rumsey Playfield (mid-park ~69th). Free, first-come; with Horsegirl & Sharp Pins.'},
+      {w:'after', t:'bar', n:'Bemelmans Bar (The Carlyle)', c:[40.7744,-73.9637], d:'Wind down with murals & live piano; or The Dead Poet on the UWS.'},
+    ]
+  },
+  {
+    id:'d6', date:'Thu · June 25', hood:'Lower Manhattan · FiDi · Harbor', nh:'fidi',
+    note:'Downtown + the harbor — your last full day. Subway to the Financial District, do the memorial & harbor in the morning, save the esplanade and a great dinner for the evening.',
+    items:[
+      {w:'~9:00 AM', t:'coffee', n:'Black Fox Coffee (FiDi)', c:[40.7068,-74.0078], d:'Your pick — polished FiDi café to start the day.'},
+      {w:'~10:00 AM', t:'activity', n:'Statue of Liberty / Governors Is. / SI Ferry', b:'book', c:[40.7033,-74.0170], d:'Pick one harbor option. Statue & Governors Island need advance tickets; the SI Ferry is free with skyline + Lady Liberty views.'},
+      {w:'~12:30 PM', t:'sight', n:'9/11 Memorial + The Oculus', c:[40.7115,-74.0125], d:'Reflecting pools at the tower footprints, then the soaring white Oculus transit hall.'},
+      {w:'~1:30 PM', t:'view', n:'One World Observatory (optional)', b:'soft', c:[40.7127,-74.0134], d:'Optional second view from the tallest building in the hemisphere; book timed entry.'},
+      {w:'afternoon', t:'walk', n:'Wall St → Battery Park City Esplanade', c:[40.7115,-74.0166], d:'Charging Bull & Stock Exchange, then the breezy Hudson-side esplanade north.'},
+      {w:'~7:00 PM', t:'food', n:'P.J. Clarke’s on the Hudson', c:[40.7141,-74.0157], d:'Your pick — waterfront American at Brookfield Place; sunset over the river.'},
+      {w:'~9:00 PM', t:'bar', n:'The Dead Rabbit', c:[40.7035,-74.0113], d:'World-famous FiDi cocktail bar — a fitting last-night nightcap. (Optional: a helicopter ride earlier — see To-Book.)'},
+    ]
+  },
+  {
+    id:'d7', date:'Fri · June 26', hood:'Departure', nh:'depart',
+    note:'Non-usable day — 12:00 PM flight. Pack, grab a quick coffee, head to the airport early.',
+    items:[
+      {w:'~7:30 AM', t:'coffee', n:'Quick coffee + pack', c:[40.7466,-73.9905], d:'Birch or any spot near the hotel; finish packing.'},
+      {w:'~8:45 AM', t:'activity', n:'Leave for the airport', b:'soft', c:[40.7466,-73.9905], d:'For a 12 PM flight, depart the hotel ~3 hrs prior. Pre-book a car or allow time for AirTrain/subway.'},
+      {w:'12:00 PM', t:'activity', n:'✈️ Flight departs', c:[40.7466,-73.9905], d:'Safe travels!'},
+    ]
+  },
+];
+
+/* ---------- STORAGE ---------- */
+const LS = {
+  get(k,f){ try{const v=localStorage.getItem(k);return v===null?f:JSON.parse(v);}catch(e){return f;} },
+  set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} },
+  del(k){ try{localStorage.removeItem(k);}catch(e){} }
+};
+const CHK='nyc26_checks', NOTE='nyc26_notes', COLL='nyc26_collapsed';
+let checks   = LS.get(CHK,{});
+let notes    = LS.get(NOTE,{});
+let collapsed= LS.get(COLL,{});
+
+let toastT;
+function toast(){const el=document.getElementById('toast');el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),900);}
+
+/* ---------- LIVE GOOGLE MAP (needs internet) ---------- */
+function buildMap(day){
+  const c=day.items.map(it=>it.c[0].toFixed(5)+','+it.c[1].toFixed(5));
+  let src,dir,label;
+  if(c.length<=1){
+    const q=c[0]||'40.7466,-73.9905';
+    src=`https://maps.google.com/maps?q=${q}&z=15&output=embed`;
+    dir=`https://www.google.com/maps/search/?api=1&query=${q}`;
+    label='location';
+  } else {
+    src=`https://maps.google.com/maps?saddr=${c[0]}&daddr=${c.slice(1).join('+to:')}&dirflg=w&output=embed`;
+    dir='https://www.google.com/maps/dir/'+c.join('/')+'/?travelmode=walking';
+    label='walking route';
+  }
+  return `<div class="mapwrap">
+    <iframe class="gmap" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="${src}" title="Map of ${day.hood}"></iframe>
+    <div class="maplinks"><a class="mlink" href="${dir}" target="_blank" rel="noopener">🧭 Open ${label} in Google Maps app</a></div>
+    <div class="mapcap">Live Google map — needs internet · stops pinned in the day’s order (matches the list numbers)</div>
+  </div>`;
+}
+
+/* ---------- RENDER TO-BOOK ---------- */
+function renderBook(){
+  const p=document.getElementById('bookPanel');
+  BOOK.forEach(b=>{
+    const row=document.createElement('label');
+    row.className='book-item'+(checks[b.id]?' checked':'');
+    const wcls=b.cls==='now'?'now':(b.cls==='done'?'done':'');
+    row.innerHTML=`<input type="checkbox" data-id="${b.id}" ${checks[b.id]?'checked':''}>
+      <span><span class="bt">${b.t}</span><span class="bw ${wcls}">${b.w}</span>
+      <span class="bd">${b.d}</span></span>`;
+    const cb=row.querySelector('input');
+    cb.addEventListener('change',()=>{checks[b.id]=cb.checked;LS.set(CHK,checks);
+      row.classList.toggle('checked',cb.checked);toast();});
+    p.appendChild(row);
+  });
+}
+
+/* ---------- RENDER DAYS ---------- */
+function renderDays(){
+  const host=document.getElementById('days');
+  DAYS.forEach(day=>{
+    const card=document.createElement('section');
+    card.className='day'+(collapsed[day.id]?' collapsed':'');
+    card.style.setProperty('--nh',NH[day.nh]);
+    let items='';
+    day.items.forEach((it,i)=>{
+      const id=day.id+'_'+i;
+      const chk=checks[id]?'checked':'';
+      items+=`<label class="item ${chk?'checked':''}" data-id="${id}">
+        <input type="checkbox" data-id="${id}" ${chk}>
+        <span class="num">${i+1}</span>
+        <span class="ic">${IC[it.t]||'•'}</span>
+        <span class="body">
+          ${it.w?`<span class="when">${it.w}</span> `:''}
+          <span class="name">${it.n}</span>
+          <span class="tag">${it.t}</span>
+          ${it.must?'<span class="must">⭐ MUST</span>':''}
+          ${badge(it.b)}
+          <a class="pinlink" href="https://www.google.com/maps/search/?api=1&query=${it.c[0]},${it.c[1]}" target="_blank" rel="noopener" title="Open in Google Maps">📍</a>
+          ${it.d?`<span class="desc">${it.d}</span>`:''}
+        </span></label>`;
+    });
+    card.innerHTML=`
+      <div class="dhead">
+        <span class="chev">▾</span>
+        <span class="dhmain">
+          <span class="dtop"><span class="ddate">${day.date}</span><span class="dhood">${day.hood}</span></span>
+          <span class="dcount">${day.items.length} stops · tap to ${collapsed[day.id]?'expand':'collapse'}</span>
+          <div class="dnote">${day.note}</div>
+        </span>
+      </div>
+      <div class="dbody">
+        ${buildMap(day)}
+        <div class="items">${items}</div>
+        <div class="notes"><label>📝 Notes for ${day.date}</label>
+          <textarea data-day="${day.id}" placeholder="Reservations, confirmation #s, swaps, ideas…">${(notes[day.id]||'').replace(/</g,'&lt;')}</textarea></div>
+      </div>`;
+
+    // collapse toggle
+    card.querySelector('.dhead').addEventListener('click',()=>{
+      const now=!card.classList.contains('collapsed');
+      card.classList.toggle('collapsed',now);
+      collapsed[day.id]=now; LS.set(COLL,collapsed);
+      card.querySelector('.dcount').textContent=`${day.items.length} stops · tap to ${now?'expand':'collapse'}`;
+    });
+    host.appendChild(card);
+  });
+
+  host.addEventListener('change',e=>{
+    if(e.target.matches('input[type=checkbox]')){
+      const id=e.target.dataset.id; checks[id]=e.target.checked; LS.set(CHK,checks);
+      e.target.closest('.item').classList.toggle('checked',e.target.checked); toast();
+    }
+  });
+  // map-pin links: open in Google Maps without toggling the checkbox
+  host.addEventListener('click',e=>{
+    const a=e.target.closest('.pinlink');
+    if(a){ e.preventDefault(); e.stopPropagation(); window.open(a.href,'_blank','noopener'); }
+  },true);
+  host.addEventListener('input',e=>{
+    if(e.target.matches('textarea')){ notes[e.target.dataset.day]=e.target.value; LS.set(NOTE,notes); }
+  });
+  host.addEventListener('blur',e=>{ if(e.target.matches('textarea')) toast(); },true);
+}
+
+function setAll(state){
+  DAYS.forEach(d=>collapsed[d.id]=state); LS.set(COLL,collapsed);
+  document.querySelectorAll('.day').forEach((c,idx)=>{
+    c.classList.toggle('collapsed',state);
+    const cnt=c.querySelector('.dcount'); if(cnt) cnt.textContent=`${DAYS[idx].items.length} stops · tap to ${state?'expand':'collapse'}`;
+  });
+}
+
+/* ---------- TOOLS ---------- */
+document.getElementById('expandAll').addEventListener('click',()=>setAll(false));
+document.getElementById('collapseAll').addEventListener('click',()=>setAll(true));
+document.getElementById('resetChk').addEventListener('click',()=>{
+  if(confirm('Clear every check-off (to-book + daily items)?')){checks={};LS.del(CHK);location.reload();}
+});
+document.getElementById('clearNotes').addEventListener('click',()=>{
+  if(confirm('Clear all your daily notes?')){notes={};LS.del(NOTE);location.reload();}
+});
+
+renderBook();
+renderDays();
+</script>
+</body>
+</html>
