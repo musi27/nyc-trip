@@ -45,9 +45,11 @@
   .book-item.checked .bt{text-decoration:line-through;color:var(--muted)}
   .book-item a{color:var(--accent)}
 
-  .legend{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 18px}
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px}
   .legend span{font-size:.74rem;color:var(--muted);background:var(--card2);border:1px solid var(--line);
     padding:3px 9px;border-radius:20px}
+  .srcnote{font-size:.8rem;color:var(--muted);margin:0 2px 18px}
+  .srcnote .src{vertical-align:middle}
 
   .day{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:16px;overflow:hidden}
   .day .dhead{padding:14px 16px;border-left:7px solid var(--nh,#888);cursor:pointer;user-select:none;
@@ -62,7 +64,7 @@
   .day .dnote{color:var(--muted);font-size:.84rem;margin-top:5px}
   .day .dcount{font-size:.72rem;color:var(--muted);margin-top:4px}
   .day.collapsed .dnote{display:none}
-  .day .dbody{max-height:6000px;overflow:hidden;transition:max-height .28s ease}
+  .day .dbody{max-height:7000px;overflow:hidden;transition:max-height .28s ease}
   .day.collapsed .dbody{max-height:0}
 
   .mapwrap{padding:10px 14px 2px}
@@ -93,11 +95,22 @@
   .badge.free{background:#3a3d6e;color:#cdd2ff}
   .item.checked .name{text-decoration:line-through;color:var(--muted)}
   .item .must{color:#ffd24a;font-weight:800;font-size:.7rem;margin-left:6px}
+  /* source tags */
+  .src{display:inline-block;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;
+    padding:2px 7px;border-radius:20px;margin-left:6px;white-space:nowrap;vertical-align:middle}
+  .src.list{background:#1d2c4a;color:#9fc1ff;border:1px solid #2f4a78}
+  .src.sug{background:#3f2810;color:#ffc78a;border:1px solid #ff8a5b}
 
   .notes{padding:0 16px 16px}
   .notes label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:5px}
   .notes textarea{width:100%;min-height:60px;background:var(--card2);color:var(--ink);
     border:1px solid var(--line);border-radius:10px;padding:9px;font-family:inherit;font-size:.9rem;resize:vertical}
+
+  .addon{display:flex;gap:9px;align-items:flex-start;padding:10px 4px;border-top:1px solid var(--line)}
+  .addon:first-of-type{border-top:none}
+  .addon .ic{flex:0 0 auto;font-size:1.05rem;width:22px;text-align:center}
+  .addon .an{font-weight:600}
+  .addon .ad{display:block;color:var(--muted);font-size:.83rem;margin-top:2px}
 
   .tools{display:flex;gap:8px;justify-content:center;margin:6px 0 24px;flex-wrap:wrap}
   .tools button{background:var(--card2);color:var(--muted);border:1px solid var(--line);
@@ -131,6 +144,8 @@
     <span>🍽️ Food</span><span>🍸 Bar</span><span>🎟️ Activity</span><span>🛍️ Market</span>
     <span>⭐ = your "must"</span><span>① numbers = map pins</span>
   </div>
+  <p class="srcnote"><span class="src list">✓ your list</span> = straight from your list (prioritised) &nbsp; · &nbsp;
+    <span class="src sug">✦ my suggestion</span> = my fill-in where your list had a gap.</p>
 
   <div class="tools" style="margin:0 0 8px">
     <button id="expandAll">Expand all days</button>
@@ -139,6 +154,11 @@
 
   <div id="days"></div>
 
+  <h2 class="section">📍 Also on your list — optional add-ons</h2>
+  <div class="panel" id="addons">
+    <p class="phint">Everything else you listed that didn't fit a cluster at a moderate pace. All <span class="src list">✓ your list</span> — slot any in if you want to swap out a suggestion or add a stop.</p>
+  </div>
+
   <div class="tools">
     <button id="resetChk">Reset all check-offs</button>
     <button id="clearNotes">Clear all notes</button>
@@ -146,8 +166,8 @@
 
   <footer>
     Times are approximate — shift freely. SummerStage show is <b>5:00 PM, free</b>.
-    Late-June sunset ≈ 8:30 PM. The embedded Google maps need an internet connection;
-    your checkmarks, notes and the rest work offline. Tap 📍 on any stop to open it in Google Maps.
+    Late-June sunset ≈ 8:30 PM. The embedded Google maps need internet; your checkmarks,
+    notes and the rest work offline. Tap 📍 on any stop to open it in Google Maps.
   </footer>
 </div>
 
@@ -157,34 +177,32 @@
 /* ---------- TO-BOOK CHECKLIST ---------- */
 const BOOK = [
   {id:'b_totr', t:'Top of the Rock — SUNSET slot', w:'NOW', cls:'now',
-   d:'Your must. Sunset timeslots sell out first. Book the ~8:00–8:30 PM entry for Sat Jun 20 (or move to Thu Jun 25 evening if you land late Sat).'},
+   d:'Your must. Sunset timeslots sell out first. Book the ~8:00–8:30 PM entry for Sat Jun 20 (or move to Thu Jun 25 if you land late).'},
   {id:'b_lib', t:'Statue of Liberty / Ellis Island ferry', w:'NOW', cls:'now',
-   d:'For the Thu Jun 25 harbor day. Reserve via Statue City Cruises 3–4 weeks out; pedestal/crown access sells out months ahead. (Staten Island Ferry is free, no booking.)'},
+   d:'For the Thu Jun 25 harbor day. Reserve via Statue City Cruises 3–4 weeks out; pedestal/crown sells out months ahead. (Staten Island Ferry is free, no booking.)'},
   {id:'b_gov', t:'Governors Island ferry', w:'SOON', cls:'',
    d:'Alternative to Statue of Liberty on the Jun 25 harbor day. Summer weekend slots sell out — book ahead.'},
   {id:'b_bike', t:'Central Park bike rental', w:'SOON', cls:'',
    d:'For Wed Jun 24 morning, before the 5 PM show. Reserve online to skip lines; walk-up also possible.'},
   {id:'b_cellar', t:'Comedy Cellar', w:'NOW', cls:'now',
    d:'Tiny room, sells out. Tickets release ~10–14 days ahead and go fast — book the moment your Tue Jun 23 slot opens.'},
-  {id:'b_bway', t:'Broadway show (optional)', w:'SOON', cls:'',
-   d:'If you want one: book now for good seats, or grab same-day TKTS discounts. Suggested free evening: Mon Jun 22 after the bridge walk.'},
+  {id:'b_bway', t:'Broadway show — Wed Jun 24, 7:00 PM', w:'DONE', cls:'done',
+   d:'Tickets booked ✓. ⚠️ Overlaps your 5 PM SummerStage show — you’d catch the openers, then leave Central Park by ~6:15 for the 7 PM curtain (likely missing Black Country, New Road’s headline set). Move one if you want both in full.'},
   {id:'b_heli', t:'Helicopter ride — FlyNYON (optional)', w:'SOON', cls:'',
    d:'Doors-off flights from Downtown/Kearny. Book 2–3 weeks out. Pairs with the Jun 25 Lower Manhattan day.'},
-  {id:'b_owo', t:'One World Observatory (optional)', w:'SOON', cls:'',
-   d:'Optional second observatory on the Jun 25 FiDi day. Buy timed entry ahead to skip the line.'},
-  {id:'b_obs2', t:'Summit One Vanderbilt / The Edge / Empire State (optional alternates)', w:'SOON', cls:'',
-   d:'Pick at most one as an alternate to Top of the Rock. All require timed tickets — book ahead.'},
-  {id:'b_luger', t:'Peter Luger Steak House (optional dinner)', w:'NOW', cls:'now',
-   d:'Williamsburg icon for the Jun 21 Brooklyn day. Books up weeks ahead — reserve early or pick the casual alt.'},
-  {id:'b_resto', t:'High-demand dinners: Rezdôra / Carbone / Lilia', w:'NOW', cls:'now',
-   d:'If you want any of these, reserve the instant the booking window opens (Resy, ~14–30 days out). Casual alternates listed each day.'},
+  {id:'b_edge', t:'The Edge at Hudson Yards — timed entry', w:'NOW', cls:'now',
+   d:'Your 2nd deck (Day 1, ~2:30 PM, at the north end of the High Line). Book a timed slot ahead. Top of the Rock stays your sunset must.'},
+  {id:'b_resto', t:'Dinner reservations — Sat & Tue', w:'NOW', cls:'now',
+   d:'Restaurant evenings only: Sat = Rezdôra (Italian), Tue = The Black Ant (Mexican). Reserve on Resy ~14–30 days out. Thu = P.J. Clarke’s (walk-ins ok). Sun/Mon/Wed are casual/walkable — no booking.'},
   {id:'b_azure', t:'Azure Rooftop Party @ Arlo Williamsburg', w:'DONE', cls:'done',
    d:'Tickets already purchased — Sun Jun 21, from ~3 PM. ✓'},
   {id:'b_summer', t:'Black Country, New Road @ SummerStage', w:'DONE', cls:'done',
    d:'Wed Jun 24, 5:00 PM, Rumsey Playfield. FREE & first-come — no ticket needed, but arrive ~4 PM for the line.'},
 ];
 
-/* ---------- ITINERARY (c = [lat,lng] for map pin) ---------- */
+/* ---------- ITINERARY ----------
+   s:'list' = from your list (prioritised) · s:'sug' = my fill-in · s:'logi' = logistics
+   c = [lat,lng] for the Google-map pin                                              */
 const NH = {chelsea:'#ff8a5b',wburg:'#27c2b5',dumbo:'#a78bfa',village:'#5fd06a',park:'#ff6fae',fidi:'#5b8dff',depart:'#9aa0b8'};
 const IC = {coffee:'☕',sight:'🏛️',view:'🌆',food:'🍽️',bar:'🍸',activity:'🎟️',market:'🛍️',walk:'🚶',park:'🌳'};
 
@@ -193,96 +211,117 @@ function badge(b){
   const m={book:['book','TO BOOK'],soft:['soft','RESERVE'],booked:['booked','BOOKED'],free:['free','FREE']};
   const x=m[b]; return x?`<span class="badge ${x[0]}">${x[1]}</span>`:'';
 }
+function srcTag(s){
+  if(s==='list') return '<span class="src list">✓ your list</span>';
+  if(s==='sug')  return '<span class="src sug">✦ my suggestion</span>';
+  return '';
+}
 
 const DAYS = [
   {
-    id:'d1', date:'Sat · June 20', hood:'Chelsea · Flatiron · NoMad (+ Midtown sunset)', nh:'chelsea',
-    note:'Arrival & home-base day. Everything is a short walk from the hotel; cap it with Top of the Rock at sunset (straight up 6th Ave). If you land late, move Top of the Rock to Thu Jun 25.',
+    id:'d1', date:'Sat · June 20', hood:'Chelsea · Flatiron → Midtown sunset', nh:'chelsea',
+    note:'Arrival & home-base day: Chelsea + two skyline decks — The Edge by day, Top of the Rock at sunset. This is the fullest day on paper, so if you land late or want downtime, trim the Bryant Park → Grand Central → Fifth Ave Midtown stretch (all en route to Top of the Rock).',
     items:[
-      {w:'on arrival', t:'coffee', n:'Birch Coffee', must:1, c:[40.7441,-73.9876], d:'Your must coffee — NoMad branch on E 27th St, a 3-min walk from the hotel.'},
-      {w:'afternoon', t:'walk', n:'The High Line', c:[40.7479,-74.0048], d:'Enter at W 30th/10th Ave and stroll the elevated rail garden south into the Meatpacking District.'},
-      {w:'~1:00 PM', t:'market', n:'Chelsea Market', c:[40.7424,-74.0061], d:'Your favorite — graze the food hall for lunch (Los Tacos No.1, lobster, bakeries).'},
-      {w:'late aft.', t:'park', n:'Madison Square Park', c:[40.7424,-73.9880], d:'Green breather by the Flatiron Building; original Shake Shack here if you want a snack.'},
-      {w:'~7:45 PM', t:'view', n:'Top of the Rock — SUNSET', must:1, b:'book', c:[40.7593,-73.9794], d:'THE must. Rockefeller Center decks; book the ~8:00–8:30 PM slot ASAP. ~12-min up 6th Ave.'},
-      {w:'~9:30 PM', t:'food', n:'Italian: Rezdôra (Flatiron)', b:'soft', c:[40.7389,-73.9885], d:'Blank Italian slot — acclaimed Emilia-Romagna pasta; reserve on Resy. Casual alt: Eataly Flatiron.'},
-      {w:'nightcap', t:'bar', n:'230 Fifth Rooftop Bar', c:[40.7448,-73.9882], d:'Your pick — open-air rooftop with a direct Empire State Building view, 2 blocks from the hotel.'},
+      {w:'on arrival', t:'coffee', n:'Birch Coffee', must:1, s:'list', c:[40.7441,-73.9876], d:'Your must coffee — NoMad branch on E 27th St, 3 min from the hotel.'},
+      {w:'late morn', t:'walk', n:'The High Line', s:'list', c:[40.7479,-74.0048], d:'Elevated rail garden from W 30th south into the Meatpacking District.'},
+      {w:'~1:00 PM', t:'market', n:'Chelsea Market', s:'list', c:[40.7424,-74.0061], d:'Your favorite — food-hall lunch (Los Tacos No.1, lobster, bakeries). The High Line runs right over it.'},
+      {w:'~2:30 PM', t:'view', n:'The Edge at Hudson Yards', b:'book', s:'list', c:[40.7538,-74.0019], d:'Your 2nd deck — highest outdoor sky deck in the hemisphere; cantilevered platform + glass floor, at the north end of the High Line. Book timed entry.'},
+      {w:'~3:45 PM', t:'park', n:'Madison Square Park', s:'list', c:[40.7424,-73.9880], d:'Green breather by the Flatiron Building; original Shake Shack here.'},
+      {w:'~4:30 PM', t:'park', n:'Bryant Park', s:'list', c:[40.7536,-73.9832], d:'Leafy Midtown square behind the Public Library. Times Square (your list) is one block west if you want the lights.'},
+      {w:'~5:00 PM', t:'sight', n:'Grand Central Terminal', s:'list', c:[40.7527,-73.9772], d:'The Beaux-Arts concourse & celestial ceiling — a quick wander on the way uptown.'},
+      {w:'~5:30 PM', t:'food', n:'Ess-a-Bagel', s:'list', c:[40.7565,-73.9701], d:'Your list — towering classic NYC bagels (Midtown East). Best as a morning/afternoon grab; closes ~5 PM, so go early-ish.'},
+      {w:'~6:00 PM', t:'walk', n:'Fifth Avenue', s:'list', c:[40.7580,-73.9772], d:'Your list — the luxury-store & landmark stretch (50s), strolling toward Rockefeller.'},
+      {w:'~7:45 PM', t:'view', n:'Top of the Rock — SUNSET', must:1, b:'book', s:'list', c:[40.7593,-73.9794], d:'THE must. Book the ~8:00–8:30 PM slot ASAP.'},
+      {w:'~9:30 PM', t:'food', n:'Italian: Rezdôra (Flatiron)', b:'soft', s:'sug', c:[40.7389,-73.9885], d:'Fills your blank Italian slot — acclaimed Emilia-Romagna pasta; reserve. Casual alt: Eataly Flatiron.'},
+      {w:'nightcap', t:'bar', n:'230 Fifth Rooftop Bar', s:'list', c:[40.7448,-73.9882], d:'Your pick — open-air rooftop with a direct Empire State view, 2 blocks from the hotel.'},
     ]
   },
   {
     id:'d2', date:'Sun · June 21', hood:'Williamsburg · North Brooklyn', nh:'wburg',
-    note:'Brooklyn day built around the Azure rooftop party at 3 PM. Take the L from 14th St to Bedford Ave. Note: Smorgasburg is in Williamsburg on Saturdays only — Sundays it’s at Prospect Park, so we graze Williamsburg instead.',
+    note:'Relaxed Brooklyn day — you’re not at the Azure party until ~4:30–5 PM, so the day fills with Williamsburg waterfront, a proper brunch, browsing and an optional brewery before the rooftop. L train from 14th St to Bedford Ave. (Smorgasburg is Williamsburg on Saturdays only — Sundays it’s at Prospect Park.)',
     items:[
-      {w:'~10:00 AM', t:'coffee', n:'Blank Street Coffee (Bedford Ave)', c:[40.7170,-73.9565], d:'Your list — quick & reliable. Upgrade: Devoción, a jungle-lit Colombian roaster nearby.'},
-      {w:'late morn', t:'walk', n:'Domino Park & waterfront', c:[40.7144,-73.9678], d:'Riverside park with the best Manhattan-skyline view in Brooklyn; pre-party stroll.'},
-      {w:'~12:30 PM', t:'food', n:'Lunch in Williamsburg', c:[40.7155,-73.9555], d:'Light bite — tacos at Chela & Garnacha, or a slice at Best Pizza on Havemeyer.'},
-      {w:'~3:00 PM', t:'activity', n:'Azure Rooftop Party @ Arlo Williamsburg', b:'booked', c:[40.7218,-73.9585], d:'Your anchor — tickets purchased. Rooftop afternoon with skyline views.'},
-      {w:'~8:00 PM', t:'food', n:'American: Peter Luger Steak House', b:'soft', c:[40.7099,-73.9626], d:'Blank American slot — legendary Williamsburg steakhouse; book weeks ahead (cash/debit). Casual alt: Marlow & Sons.'},
-      {w:'nightcap', t:'bar', n:'The Ides at Wythe Hotel', c:[40.7218,-73.9581], d:'Rooftop cocktails over the skyline; or Westlight at The William Vale for a higher vantage.'},
+      {w:'~10:00 AM', t:'coffee', n:'Blank Street Coffee (Bedford Ave)', s:'list', c:[40.7170,-73.9565], d:'Your list — quick & reliable. ✦ Upgrade option: Devoción, a jungle-lit Colombian roaster nearby.'},
+      {w:'~10:15 AM', t:'food', n:'Leon’s Bagels (Bedford Ave)', s:'list', c:[40.7172,-73.9577], d:'Your list — breakfast bagels right on Bedford by the coffee. (Also branches in SoHo — Day 4 — and FiDi — Day 6.)'},
+      {w:'~11:30 AM', t:'walk', n:'Domino Park & waterfront', s:'sug', c:[40.7144,-73.9678], d:'My add — riverside park with the best Manhattan-skyline view in Brooklyn.'},
+      {w:'~12:30 PM', t:'food', n:'Relaxed lunch: Sunday in Brooklyn', s:'sug', c:[40.7220,-73.9586], d:'My add — with the party not till ~4:30 there’s time for a proper Williamsburg brunch. Sunday in Brooklyn, or Le Crocodile at the Wythe, or Five Leaves in Greenpoint.'},
+      {w:'~2:00 PM', t:'market', n:'Williamsburg browse: Artists & Fleas + Bedford Ave', s:'sug', c:[40.7188,-73.9585], d:'My add — Sunday flea market plus the vintage / record / boutique strip along Bedford & Wythe.'},
+      {w:'~3:00 PM', t:'activity', n:'Brooklyn Brewery tasting (optional)', s:'sug', c:[40.7217,-73.9576], d:'My add — drop into the N 11th St tasting room, or just stroll McCarren Park if you’d rather keep it mellow.'},
+      {w:'~4:30 PM', t:'activity', n:'Azure Rooftop Party @ Arlo Williamsburg', b:'booked', s:'list', c:[40.7218,-73.9585], d:'Your anchor — tickets purchased. Aim to arrive 4:30–5 PM. Rooftop evening with skyline views.'},
+      {w:'~8:00 PM', t:'food', n:'Casual: Williamsburg kebab / tacos', s:'sug', c:[40.7155,-73.9560], d:'Sunday = casual night. Grab-and-go on or near Bedford: Oasis falafel & shawarma, King Souvlaki, or tacos at Chela & Garnacha.'},
+      {w:'nightcap', t:'bar', n:'Rooftop: The Ides at Wythe Hotel', b:'', s:'sug', c:[40.7218,-73.9581], d:'Fills a blank rooftop slot — cocktails over the skyline; or Westlight at The William Vale for a higher vantage.'},
     ]
   },
   {
     id:'d3', date:'Mon · June 22', hood:'DUMBO · Brooklyn Heights · Brooklyn Bridge Park', nh:'dumbo',
-    note:'The prettiest stretch of waterfront in NYC. Subway to Clark St or Borough Hall, walk down to the water, and finish by crossing the Brooklyn Bridge back into Manhattan.',
+    note:'Brooklyn waterfront, then south into Gowanus. Walk the Brooklyn Bridge over from Manhattan to start, explore DUMBO & Brooklyn Heights, then subway down to Gowanus for galleries, a brewery and casual eats. (No coffee from your list is in this area, so the café is my pick. Monday = casual night.)',
     items:[
-      {w:'~9:30 AM', t:'coffee', n:'Brooklyn Roasting Company', c:[40.7035,-73.9869], d:'Warehouse-y café near the water to fuel up. (Or Devoción’s DUMBO outpost.)'},
-      {w:'morning', t:'sight', n:'Brooklyn Bridge Park — Pier 5', must:1, c:[40.6968,-73.9994], d:'Your must. Walk the piers north; lawns, Jane’s Carousel, head-on Manhattan views.'},
-      {w:'late morn', t:'walk', n:'Brooklyn Heights Promenade + Squibb Bridge', c:[40.6968,-73.9966], d:'Bouncy footbridge up to the cliff-top promenade for the classic skyline panorama.'},
-      {w:'~1:00 PM', t:'market', n:'Time Out Market (DUMBO)', c:[40.7027,-73.9908], d:'Your favorite — two dozen stalls + rooftop with bridge views. Lunch here.'},
-      {w:'afternoon', t:'view', n:'DUMBO — Washington & Water St', c:[40.7036,-73.9905], d:'The iconic shot: Manhattan Bridge framed between brick buildings. Pebble Beach just below.'},
-      {w:'~5:00 PM', t:'food', n:'Italian: Cecconi’s DUMBO', b:'soft', c:[40.7026,-73.9912], d:'Blank Italian slot — waterfront Italian under the bridge; reserve. Casual alt: Juliana’s pizza.'},
-      {w:'~7:00 PM', t:'bar', n:'Harriet’s Rooftop (1 Hotel)', c:[40.7008,-73.9956], d:'Sunset cocktails over the harbor.'},
-      {w:'dusk', t:'walk', n:'Walk the Brooklyn Bridge → Manhattan', c:[40.7061,-73.9969], d:'End the day on foot across the bridge. (Optional: a Broadway show tonight — see To-Book.)'},
+      {w:'~9:30 AM', t:'walk', n:'Walk the Brooklyn Bridge → DUMBO', s:'list', c:[40.7061,-73.9969], d:'Your list — start by crossing the bridge from Manhattan (subway to Brooklyn Bridge–City Hall) into DUMBO.'},
+      {w:'~10:15 AM', t:'coffee', n:'Brooklyn Roasting Company', s:'sug', c:[40.7035,-73.9869], d:'My add — no coffee from your list is in DUMBO; a solid waterfront-adjacent roaster. (Or Devoción’s DUMBO outpost.)'},
+      {w:'~10:45 AM', t:'sight', n:'Brooklyn Bridge Park — Pier 5', must:1, s:'list', c:[40.6968,-73.9994], d:'Your must. Walk the piers; lawns, Jane’s Carousel, head-on Manhattan views.'},
+      {w:'late morn', t:'walk', n:'Brooklyn Heights Promenade + Squibb Bridge', s:'list', c:[40.6968,-73.9966], d:'Your list — bouncy footbridge up to the cliff-top promenade for the classic skyline panorama.'},
+      {w:'~1:00 PM', t:'market', n:'Time Out Market (DUMBO)', s:'list', c:[40.7027,-73.9908], d:'Your favorite — two dozen stalls + rooftop with bridge views. Casual lunch here.'},
+      {w:'~2:00 PM', t:'view', n:'DUMBO — Washington & Water St', s:'list', c:[40.7036,-73.9905], d:'Your Dumbo waterfront — the iconic Manhattan-Bridge-framed shot. Pebble Beach just below.'},
+      {w:'~3:30 PM', t:'activity', n:'Gowanus, Brooklyn', s:'list', c:[40.6748,-73.9888], d:'Your list — subway south (R to Union St). Galleries, the Gowanus Canal, and Royal Palms shuffleboard club.'},
+      {w:'~5:30 PM', t:'bar', n:'Gowanus brewery', s:'sug', c:[40.6790,-73.9860], d:'My add — Threes Brewing or Other Half taproom; the heart of the Gowanus scene.'},
+      {w:'~7:30 PM', t:'food', n:'Casual: Gowanus kebab / slice', s:'sug', c:[40.6760,-73.9895], d:'Monday = casual night. Grab-and-go: a kebab, tacos, or a slice as you wander.'},
     ]
   },
   {
-    id:'d4', date:'Tue · June 23', hood:'Greenwich Village · East Village · Lower East Side', nh:'village',
-    note:'Downtown wandering day — bagels, ball courts, parks, pizza, and a late comedy show. Very walkable; the subway only to start and end.',
+    id:'d4', date:'Tue · June 23', hood:'Greenwich Village · East Village · SoHo · LES', nh:'village',
+    note:'Downtown wandering day — bagels, ball courts, parks, pizza, late comedy. Very walkable; subway only to start and end. This area is where most of your remaining coffee picks live.',
     items:[
-      {w:'~9:30 AM', t:'coffee', n:'La Cabra (East Village)', must:1, c:[40.7290,-73.9869], d:'Your must coffee — Danish minimalist roaster on 2nd Ave with great cardamom buns.'},
-      {w:'~10:30 AM', t:'food', n:'Russ & Daughters Cafe', c:[40.7215,-73.9882], d:'Your pick — sit-down appetizing classic: bagels, lox, whitefish on the LES.'},
-      {w:'midday', t:'activity', n:'The Cage — West 4th St Courts', c:[40.7314,-74.0007], d:'Your pick — legendary streetball court; catch a pickup game through the fence.'},
-      {w:'afternoon', t:'park', n:'Washington Square Park + SoHo', c:[40.7308,-73.9973], d:'Arch, fountain, buskers — then drift into SoHo’s cast-iron shopping blocks.'},
-      {w:'~3:00 PM', t:'food', n:'Joe’s Pizza (Carmine St)', c:[40.7305,-74.0030], d:'Your pick — NYC’s most famous slice. Eat it on the sidewalk.'},
-      {w:'~7:00 PM', t:'food', n:'Mexican: Tacombi / Jajaja', b:'soft', c:[40.7223,-73.9948], d:'Blank Mexican slot — Tacombi’s casual tacos (NoLita) or plant-based Jajaja on the LES. No res.'},
-      {w:'~9:30 PM', t:'activity', n:'Comedy Cellar (MacDougal St)', b:'book', c:[40.7301,-74.0003], d:'Book ASAP — tiny room, sells out. Late show fits dinner timing.'},
-      {w:'after', t:'bar', n:'PDT speakeasy', c:[40.7273,-73.9844], d:'Your "NYC speakeasy" — enter through the phone booth inside Crif Dogs, East Village.'},
+      {w:'~9:30 AM', t:'coffee', n:'La Cabra (East Village)', must:1, s:'list', c:[40.7290,-73.9869], d:'Your must coffee — Danish minimalist roaster on 2nd Ave. Also on your list & right on today’s route: Urban Backyard (Nolita) and ansā (SoHo).'},
+      {w:'~10:30 AM', t:'food', n:'Russ & Daughters Cafe', s:'list', c:[40.7215,-73.9882], d:'Your pick — sit-down appetizing classic: bagels, lox, whitefish on the LES.'},
+      {w:'midday', t:'activity', n:'The Cage — West 4th St Courts', s:'list', c:[40.7314,-74.0007], d:'Your pick — legendary streetball court; catch a pickup game through the fence.'},
+      {w:'afternoon', t:'park', n:'Washington Square Park + SoHo wander', s:'sug', c:[40.7308,-73.9973], d:'My add — arch, fountain, buskers, then SoHo’s cast-iron shopping blocks (pass Urban Backyard & ansā here).'},
+      {w:'~3:00 PM', t:'food', n:'Joe’s Pizza (Carmine St)', s:'list', c:[40.7305,-74.0030], d:'Your pick — NYC’s most famous slice. Eat it on the sidewalk.'},
+      {w:'~7:00 PM', t:'food', n:'Mexican dinner: The Black Ant (East Village)', b:'soft', s:'sug', c:[40.7246,-73.9888], d:'Tuesday = sit-down night. Fills your blank Mexican slot — upscale-ish East Village Mexican; reserve. Casual alt: Tacombi tacos.'},
+      {w:'~9:30 PM', t:'activity', n:'Comedy Cellar (MacDougal St)', b:'book', s:'list', c:[40.7301,-74.0003], d:'Your pick — book ASAP; tiny room, sells out. Late show fits dinner timing.'},
+      {w:'after', t:'bar', n:'Speakeasy: PDT', b:'', s:'sug', c:[40.7273,-73.9844], d:'My pick for your "NYC speakeasy" slot — enter through the phone booth inside Crif Dogs, East Village.'},
     ]
   },
   {
     id:'d5', date:'Wed · June 24', hood:'Central Park · Upper East Side · The Met', nh:'park',
-    note:'Central Park day around the 5 PM SummerStage show. Bike the park in the morning while it’s cool, hit the Met, then walk to Rumsey Playfield. Arrive ~4 PM for the free-show line.',
+    note:'Central Park by day, Broadway by night. ⚠️ Your booked 7 PM Broadway curtain overlaps the 5 PM SummerStage show — plan to catch the openers, then leave the park by ~6:15 (you’ll likely miss Black Country, New Road’s headline set). Bike the park in the morning, hit the Met, line up for SummerStage ~4 PM.',
     items:[
-      {w:'~9:00 AM', t:'coffee', n:'Joe Coffee / Blank Street (UES)', c:[40.7730,-73.9618], d:'Grab coffee on the way to the bike kiosk.'},
-      {w:'~9:30 AM', t:'activity', n:'Central Park bike ride — S→N', must:1, b:'book', c:[40.7679,-73.9819], d:'Your must route. Rent near Columbus Circle, loop up past Bethesda, the Reservoir, toward Harlem. Reserve ahead.'},
-      {w:'~12:30 PM', t:'food', n:'Lunch on the Upper East Side', c:[40.7782,-73.9601], d:'Casual near the Met — a café on Madison, or the Met rooftop bar in summer.'},
-      {w:'~1:30 PM', t:'sight', n:'The Metropolitan Museum of Art', must:1, c:[40.7794,-73.9632], d:'Your must museum — 2–3 focused hours. Pay-what-you-wish for NY State residents; others timed tickets.'},
-      {w:'~4:00 PM', t:'food', n:'American: The Penrose / pre-show snack', c:[40.7762,-73.9530], d:'Blank American slot — UES gastropub, or grab food carts by the park before lining up.'},
-      {w:'5:00 PM', t:'activity', n:'Black Country, New Road @ SummerStage', b:'free', c:[40.7712,-73.9710], d:'Your anchor — Rumsey Playfield (mid-park ~69th). Free, first-come; with Horsegirl & Sharp Pins.'},
-      {w:'after', t:'bar', n:'Bemelmans Bar (The Carlyle)', c:[40.7744,-73.9637], d:'Wind down with murals & live piano; or The Dead Poet on the UWS.'},
+      {w:'~9:00 AM', t:'coffee', n:'Blank Street Coffee (UES)', s:'list', c:[40.7730,-73.9618], d:'Your list — there’s a UES branch near the park; grab coffee on the way to the bike kiosk.'},
+      {w:'~9:30 AM', t:'activity', n:'Central Park bike ride — S→N', must:1, b:'book', s:'list', c:[40.7679,-73.9819], d:'Your must route. Rent near Columbus Circle, loop up past Bethesda, the Reservoir, toward Harlem. Reserve ahead.'},
+      {w:'~12:30 PM', t:'food', n:'Lunch on the Upper East Side', s:'sug', c:[40.7782,-73.9601], d:'My add — casual near the Met: a café on Madison, or the Met rooftop bar in summer.'},
+      {w:'~1:30 PM', t:'sight', n:'The Metropolitan Museum of Art', must:1, s:'list', c:[40.7794,-73.9632], d:'Your must museum — 2–3 focused hours. Pay-what-you-wish for NY State residents; others timed tickets. Grab food carts by the park before lining up.'},
+      {w:'5:00 PM', t:'activity', n:'Black Country, New Road @ SummerStage', b:'free', s:'list', c:[40.7712,-73.9710], d:'Your anchor — Rumsey Playfield (mid-park ~69th). Free, first-come; with Horsegirl & Sharp Pins. ⚠️ Leave by ~6:15 to make the Broadway curtain.'},
+      {w:'7:00 PM', t:'activity', n:'Broadway Show (Theater District)', b:'booked', s:'list', c:[40.7590,-73.9869], d:'Booked ✓ — 7:00 PM curtain. Arrive 20 min early. (Grab food carts by the park earlier if you need a bite first.)'},
+      {w:'~9:45 PM', t:'food', n:'Los Tacos No. 1 (Times Square)', s:'list', c:[40.7575,-73.9874], d:'Casual post-show dinner — your pick. Fast stand-up adobada/carne asada tacos at the 43rd St spot, a 2-min walk from the theaters. Open late.'},
+      {w:'~10:45 PM', t:'bar', n:'Post-show nightcap', s:'sug', c:[40.7600,-73.9855], d:'My add — a drink near the Theater District (Jimmy’s Corner dive bar, or a Midtown hotel bar). Bemelmans on the UES if you’d rather head east.'},
     ]
   },
   {
     id:'d6', date:'Thu · June 25', hood:'Lower Manhattan · FiDi · Harbor', nh:'fidi',
     note:'Downtown + the harbor — your last full day. Subway to the Financial District, do the memorial & harbor in the morning, save the esplanade and a great dinner for the evening.',
     items:[
-      {w:'~9:00 AM', t:'coffee', n:'Black Fox Coffee (FiDi)', c:[40.7068,-74.0078], d:'Your pick — polished FiDi café to start the day.'},
-      {w:'~10:00 AM', t:'activity', n:'Statue of Liberty / Governors Is. / SI Ferry', b:'book', c:[40.7033,-74.0170], d:'Pick one harbor option. Statue & Governors Island need advance tickets; the SI Ferry is free with skyline + Lady Liberty views.'},
-      {w:'~12:30 PM', t:'sight', n:'9/11 Memorial + The Oculus', c:[40.7115,-74.0125], d:'Reflecting pools at the tower footprints, then the soaring white Oculus transit hall.'},
-      {w:'~1:30 PM', t:'view', n:'One World Observatory (optional)', b:'soft', c:[40.7127,-74.0134], d:'Optional second view from the tallest building in the hemisphere; book timed entry.'},
-      {w:'afternoon', t:'walk', n:'Wall St → Battery Park City Esplanade', c:[40.7115,-74.0166], d:'Charging Bull & Stock Exchange, then the breezy Hudson-side esplanade north.'},
-      {w:'~7:00 PM', t:'food', n:'P.J. Clarke’s on the Hudson', c:[40.7141,-74.0157], d:'Your pick — waterfront American at Brookfield Place; sunset over the river.'},
-      {w:'~9:00 PM', t:'bar', n:'The Dead Rabbit', c:[40.7035,-74.0113], d:'World-famous FiDi cocktail bar — a fitting last-night nightcap. (Optional: a helicopter ride earlier — see To-Book.)'},
+      {w:'~9:00 AM', t:'coffee', n:'Black Fox Coffee (FiDi)', s:'list', c:[40.7068,-74.0078], d:'Your pick — polished FiDi café. Also on your list nearby: Blue Dove Coffee (Church St).'},
+      {w:'~10:00 AM', t:'activity', n:'Statue of Liberty / Governors Is. / SI Ferry', b:'book', s:'list', c:[40.7033,-74.0170], d:'All three on your list — pick one harbor option. Statue & Governors Island need advance tickets; the SI Ferry is free with skyline + Lady Liberty views.'},
+      {w:'~12:30 PM', t:'sight', n:'9/11 Memorial + The Oculus', s:'list', c:[40.7115,-74.0125], d:'Your list — reflecting pools at the tower footprints, then the soaring white Oculus. (Skipping the One WTC deck — you’ve got The Edge + Top of the Rock.)'},
+      {w:'afternoon', t:'walk', n:'Wall St → Battery Park City Esplanade', s:'list', c:[40.7115,-74.0166], d:'Your list — Charging Bull & Stock Exchange, then the breezy Hudson-side esplanade.'},
+      {w:'~7:00 PM', t:'food', n:'P.J. Clarke’s on the Hudson', s:'list', c:[40.7141,-74.0157], d:'Your pick — waterfront American at Brookfield Place; sunset over the river.'},
+      {w:'~9:00 PM', t:'bar', n:'The Dead Rabbit', s:'sug', c:[40.7035,-74.0113], d:'My add — world-famous FiDi cocktail bar; a fitting last-night nightcap. (Optional: a helicopter ride earlier — see To-Book.)'},
     ]
   },
   {
     id:'d7', date:'Fri · June 26', hood:'Departure', nh:'depart',
     note:'Non-usable day — 12:00 PM flight. Pack, grab a quick coffee, head to the airport early.',
     items:[
-      {w:'~7:30 AM', t:'coffee', n:'Quick coffee + pack', c:[40.7466,-73.9905], d:'Birch or any spot near the hotel; finish packing.'},
-      {w:'~8:45 AM', t:'activity', n:'Leave for the airport', b:'soft', c:[40.7466,-73.9905], d:'For a 12 PM flight, depart the hotel ~3 hrs prior. Pre-book a car or allow time for AirTrain/subway.'},
-      {w:'12:00 PM', t:'activity', n:'✈️ Flight departs', c:[40.7466,-73.9905], d:'Safe travels!'},
+      {w:'~7:30 AM', t:'coffee', n:'Quick coffee + pack', s:'logi', c:[40.7466,-73.9905], d:'Birch or any spot near the hotel; finish packing.'},
+      {w:'~8:45 AM', t:'activity', n:'Leave for the airport', b:'soft', s:'logi', c:[40.7466,-73.9905], d:'For a 12 PM flight, depart the hotel ~3 hrs prior. Pre-book a car or allow time for AirTrain/subway.'},
+      {w:'12:00 PM', t:'activity', n:'✈️ Flight departs', s:'logi', c:[40.7466,-73.9905], d:'Safe travels!'},
     ]
   },
+];
+
+/* ---------- OPTIONAL ADD-ONS (all from your list, unplaced) ---------- */
+const ADDONS = [
+  {ic:'🟥', n:'Times Square', d:'One block west of Bryant Park (Day 1) if you want the full lights.'},
+  {ic:'🚠', n:'Roosevelt Island Tram', d:'Aerial tram + funicular-style views from Midtown East (59th St) — a quick add near Day 1 or Day 5.'},
+  {ic:'🗿', n:'Socrates Sculpture Park + Gantry Plaza State Park (LIC, Queens)', d:'Outdoor sculpture + a knockout skyline lawn — but they’re in Queens and would need a dedicated half-day away from the other clusters.'},
 ];
 
 /* ---------- STORAGE ---------- */
@@ -306,12 +345,10 @@ function buildMap(day){
   if(c.length<=1){
     const q=c[0]||'40.7466,-73.9905';
     src=`https://maps.google.com/maps?q=${q}&z=15&output=embed`;
-    dir=`https://www.google.com/maps/search/?api=1&query=${q}`;
-    label='location';
+    dir=`https://www.google.com/maps/search/?api=1&query=${q}`; label='location';
   } else {
     src=`https://maps.google.com/maps?saddr=${c[0]}&daddr=${c.slice(1).join('+to:')}&dirflg=w&output=embed`;
-    dir='https://www.google.com/maps/dir/'+c.join('/')+'/?travelmode=walking';
-    label='walking route';
+    dir='https://www.google.com/maps/dir/'+c.join('/')+'/?travelmode=walking'; label='walking route';
   }
   return `<div class="mapwrap">
     <iframe class="gmap" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="${src}" title="Map of ${day.hood}"></iframe>
@@ -337,6 +374,17 @@ function renderBook(){
   });
 }
 
+/* ---------- RENDER ADD-ONS ---------- */
+function renderAddons(){
+  const p=document.getElementById('addons');
+  ADDONS.forEach(a=>{
+    const row=document.createElement('div'); row.className='addon';
+    row.innerHTML=`<span class="ic">${a.ic}</span><span><span class="an">${a.n}</span>
+      <span class="src list">✓ your list</span><span class="ad">${a.d}</span></span>`;
+    p.appendChild(row);
+  });
+}
+
 /* ---------- RENDER DAYS ---------- */
 function renderDays(){
   const host=document.getElementById('days');
@@ -357,6 +405,7 @@ function renderDays(){
           <span class="name">${it.n}</span>
           <span class="tag">${it.t}</span>
           ${it.must?'<span class="must">⭐ MUST</span>':''}
+          ${srcTag(it.s)}
           ${badge(it.b)}
           <a class="pinlink" href="https://www.google.com/maps/search/?api=1&query=${it.c[0]},${it.c[1]}" target="_blank" rel="noopener" title="Open in Google Maps">📍</a>
           ${it.d?`<span class="desc">${it.d}</span>`:''}
@@ -378,7 +427,6 @@ function renderDays(){
           <textarea data-day="${day.id}" placeholder="Reservations, confirmation #s, swaps, ideas…">${(notes[day.id]||'').replace(/</g,'&lt;')}</textarea></div>
       </div>`;
 
-    // collapse toggle
     card.querySelector('.dhead').addEventListener('click',()=>{
       const now=!card.classList.contains('collapsed');
       card.classList.toggle('collapsed',now);
@@ -394,7 +442,6 @@ function renderDays(){
       e.target.closest('.item').classList.toggle('checked',e.target.checked); toast();
     }
   });
-  // map-pin links: open in Google Maps without toggling the checkbox
   host.addEventListener('click',e=>{
     const a=e.target.closest('.pinlink');
     if(a){ e.preventDefault(); e.stopPropagation(); window.open(a.href,'_blank','noopener'); }
@@ -424,6 +471,7 @@ document.getElementById('clearNotes').addEventListener('click',()=>{
 });
 
 renderBook();
+renderAddons();
 renderDays();
 </script>
 </body>
